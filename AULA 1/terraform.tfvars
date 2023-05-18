@@ -1,2 +1,2 @@
-do_token= "dop_v1_ec17c9e2286ebedfec21c61b9121b50c52cfdcb32c4c84bccce57b4519fe01b3"
+do_token= "token-da-API"
 vms_count = 3
