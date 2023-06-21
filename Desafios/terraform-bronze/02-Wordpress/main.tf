@@ -95,5 +95,8 @@ resource "digitalocean_firewall" "Firewall" {
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 
+output "mysql_connection_string" {
+  value = "mysql://${var.mysql_user}:${var.mysql_password}@${digitalocean_droplet.example.ipv4_address}/${var.mysql_database}"
+}
 
 }
