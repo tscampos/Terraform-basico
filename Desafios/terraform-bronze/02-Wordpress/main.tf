@@ -18,6 +18,21 @@ resource "digitalocean_droplet" "VM_aula" {
   region   = var.region_droplet
   size     = var.size_droplet
   ssh_keys = [data.digitalocean_ssh_key.ssh_key.id]
+
+  connection {
+    type = "ssh"
+    user = "root"
+    private_key = file("~/.ssh/ansible")
+    timeout = "2m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "apt-get update",
+      "apt-get install -y mysql-server",
+      "mysql_secure_installation",
+    ]
+  }
 }
 
 data "digitalocean_ssh_key" "ssh_key" {
@@ -29,16 +44,11 @@ resource "digitalocean_firewall" "Firewall" {
 
   droplet_ids = digitalocean_droplet.VM_aula[*].id
 
+                                                # INBOUND
   inbound_rule {
     protocol         = "tcp"
     port_range       = "22"
     source_addresses = ["239.13.117.114", "::/0"]
-  }
-
-  outbound_rule {
-    protocol              = "tcp"
-    port_range            = "22"
-    destination_addresses = ["239.13.117.114", "::/0"]
   }
 
   inbound_rule {
@@ -47,22 +57,10 @@ resource "digitalocean_firewall" "Firewall" {
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
-  outbound_rule {
-    protocol              = "tcp"
-    port_range            = "53"
-    destination_addresses = ["0.0.0.0/0", "::/0"]
-  }
-
   inbound_rule {
     protocol         = "tcp"
     port_range       = "443"
     source_addresses = ["0.0.0.0/0", "::/0"]
-  }
-
-  outbound_rule {
-    protocol              = "tcp"
-    port_range            = "443"
-    destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   inbound_rule {
@@ -71,29 +69,31 @@ resource "digitalocean_firewall" "Firewall" {
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "3306"
+    source_addresses = ["239.13.117.114"]
+  }
+
+                                                # OUTBOUND
+
+  outbound_rule {
+    protocol              = "tcp"
+    port_range            = "53"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "tcp"
+    port_range            = "443"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
   outbound_rule {
     protocol              = "tcp"
     port_range            = "80"
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 
-}
 
-variable "do_token" {
-}
-
-variable "image_droplet" {
-  default = "ubuntu-22-04-x64"
-}
-
-variable "size_droplet" {
-  default = "s-1vcpu-2gb"
-}
-
-variable "region_droplet" {
-  default = "nyc1"
-}
-
-variable "ssh_key_name" {
-  default = "twitter-ssh"
 }
