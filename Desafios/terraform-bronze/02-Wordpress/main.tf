@@ -9,6 +9,7 @@ terraform {
 }
 
 provider "digitalocean" {
+  token = var.do_token
 }
 
 resource "digitalocean_droplet" "VM_aula" {
@@ -18,21 +19,21 @@ resource "digitalocean_droplet" "VM_aula" {
   size     = var.size_droplet
   ssh_keys = [data.digitalocean_ssh_key.ssh_key.id]
 
-  connection {
-    host = "VM"
-    type = "ssh"
-    user = "root"
-    private_key = file("~/.ssh/ansible")
-    timeout = "2m"
-  }
+  # connection {
+  #   type = "ssh"
+  #   user = "root"
+  #   private_key = file("~/.ssh/ansible")
+  #   host = digitalocean_droplet.VM_aula.ipv4_address
+  #   timeout = "2m"
+  # }
 
-  provisioner "remote-exec" {
-    inline = [
-      "apt-get update",
-      "apt-get install -y mysql-server",
-      "mysql_secure_installation",
-    ]
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "apt-get update",
+  #     "apt-get install -y mysql-server",
+  #     "mysql_secure_installation",
+  #   ]
+  # }
 
 }
 
@@ -49,7 +50,7 @@ resource "digitalocean_firewall" "Firewall" {
   inbound_rule {
     protocol         = "tcp"
     port_range       = "22"
-    source_addresses = ["239.13.117.114", "::/0"]
+    source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   inbound_rule {
@@ -73,7 +74,7 @@ resource "digitalocean_firewall" "Firewall" {
   inbound_rule {
     protocol         = "tcp"
     port_range       = "3306"
-    source_addresses = ["239.13.117.114"]
+    source_addresses = ["0.0.0.0/0"]
   }
 
                                                 # OUTBOUND
@@ -98,9 +99,8 @@ resource "digitalocean_firewall" "Firewall" {
 
 }
 
-# variable "do_token" {
-#   value = "dop_v1_09cecbc1bfc1cd1a42421fcfe9b62aaa93098a381bf938136ebf88aaa1c4d361"
-# }
+variable "do_token" {
+}
 
 variable "image_droplet" {
   default = "ubuntu-22-04-x64"
