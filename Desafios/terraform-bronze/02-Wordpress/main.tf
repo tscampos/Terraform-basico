@@ -18,23 +18,6 @@ resource "digitalocean_droplet" "VM_aula" {
   region   = var.region_droplet
   size     = var.size_droplet
   ssh_keys = [data.digitalocean_ssh_key.ssh_key.id]
-
-  # connection {
-  #   type = "ssh"
-  #   user = "root"
-  #   private_key = file("~/.ssh/ansible")
-  #   host = digitalocean_droplet.VM_aula.ipv4_address
-  #   timeout = "2m"
-  # }
-
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "apt-get update",
-  #     "apt-get install -y mysql-server",
-  #     "mysql_secure_installation",
-  #   ]
-  # }
-
 }
 
 data "digitalocean_ssh_key" "ssh_key" {
@@ -50,31 +33,31 @@ resource "digitalocean_firewall" "Firewall" {
   inbound_rule {
     protocol         = "tcp"
     port_range       = "22"
-    source_addresses = ["0.0.0.0/0", "::/0"]
+    source_addresses = ["239.13.117.114", "::/0"]
   }
 
   inbound_rule {
     protocol         = "tcp"
     port_range       = "53"
-    source_addresses = ["0.0.0.0/0", "::/0"]
+    source_addresses = ["239.13.117.114", "::/0"]
   }
 
   inbound_rule {
     protocol         = "tcp"
     port_range       = "443"
-    source_addresses = ["0.0.0.0/0", "::/0"]
+    source_addresses = ["239.13.117.114", "::/0"]
   }
 
   inbound_rule {
     protocol         = "tcp"
     port_range       = "80"
-    source_addresses = ["0.0.0.0/0", "::/0"]
+    source_addresses = ["239.13.117.114", "::/0"]
   }
 
   inbound_rule {
     protocol         = "tcp"
     port_range       = "3306"
-    source_addresses = ["0.0.0.0/0"]
+    source_addresses = ["239.13.117.114"]
   }
 
                                                 # OUTBOUND
@@ -118,7 +101,7 @@ variable "ssh_key_name" {
   default = "twitter-ssh"
 }
 
-# Variáveis de ambiente do DB MySQL
+                              # Variáveis de ambiente do DB MySQL
 variable "mysql_user" {
   description = "Username for MySQL"
   type        = string
