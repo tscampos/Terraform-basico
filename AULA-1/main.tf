@@ -17,6 +17,23 @@ resource "digitalocean_droplet" "VM_aula" {
   size     = var.droplet_size
   ssh_keys = [data.digitalocean_ssh_key.ssh_key.id]
   count    = var.vms_count
+
+                                            ##### Acessando VM para instalação remota #####
+  # connection {
+  #   type = "ssh"
+  #   user = "root"
+  #   private_key = file("~/.ssh/ansible")
+  #   host = digitalocean_droplet.VM_aula.ipv4_address
+  #   timeout = "2m"
+  # }
+
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "apt-get update",
+  #     "apt-get install -y mysql-server",
+  #     "mysql_secure_installation",
+  #   ]
+  # }
 }
 
                                               ##### FIREWALL #####
