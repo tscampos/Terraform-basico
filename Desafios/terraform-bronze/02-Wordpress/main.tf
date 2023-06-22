@@ -9,7 +9,6 @@ terraform {
 }
 
 provider "digitalocean" {
-  token = "dop_v1_09cecbc1bfc1cd1a42421fcfe9b62aaa93098a381bf938136ebf88aaa1c4d361"
 }
 
 resource "digitalocean_droplet" "VM_aula" {
@@ -34,6 +33,7 @@ resource "digitalocean_droplet" "VM_aula" {
       "mysql_secure_installation",
     ]
   }
+
 }
 
 data "digitalocean_ssh_key" "ssh_key" {
@@ -96,8 +96,6 @@ resource "digitalocean_firewall" "Firewall" {
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 
-output "mysql_connection_string" {
-  value = "mysql://${var.mysql_user}:${var.mysql_password}@${digitalocean_droplet.example.ipv4_address}/${var.mysql_database}"
 }
 
 # variable "do_token" {
@@ -139,4 +137,6 @@ variable "mysql_database" {
   default     = "mydatabase"
 }
 
+output "mysql_connection_string" {
+  value = "mysql://${var.mysql_user}:${var.mysql_password}@${digitalocean_droplet.VM_aula.ipv4_address}/${var.mysql_database}"
 }
