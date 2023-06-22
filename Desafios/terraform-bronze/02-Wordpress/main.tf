@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "digitalocean" {
-  token = var.do_token
+  token = "dop_v1_09cecbc1bfc1cd1a42421fcfe9b62aaa93098a381bf938136ebf88aaa1c4d361"
 }
 
 resource "digitalocean_droplet" "VM_aula" {
@@ -20,6 +20,7 @@ resource "digitalocean_droplet" "VM_aula" {
   ssh_keys = [data.digitalocean_ssh_key.ssh_key.id]
 
   connection {
+    host = "VM"
     type = "ssh"
     user = "root"
     private_key = file("~/.ssh/ansible")
@@ -97,6 +98,45 @@ resource "digitalocean_firewall" "Firewall" {
 
 output "mysql_connection_string" {
   value = "mysql://${var.mysql_user}:${var.mysql_password}@${digitalocean_droplet.example.ipv4_address}/${var.mysql_database}"
+}
+
+# variable "do_token" {
+#   value = "dop_v1_09cecbc1bfc1cd1a42421fcfe9b62aaa93098a381bf938136ebf88aaa1c4d361"
+# }
+
+variable "image_droplet" {
+  default = "ubuntu-22-04-x64"
+}
+
+variable "size_droplet" {
+  default = "s-1vcpu-2gb"
+}
+
+variable "region_droplet" {
+  default = "nyc1"
+}
+
+variable "ssh_key_name" {
+  default = "twitter-ssh"
+}
+
+# Variáveis de ambiente do DB MySQL
+variable "mysql_user" {
+  description = "Username for MySQL"
+  type        = string
+  default     = "myuser"
+}
+
+variable "mysql_password" {
+  description = "Password for MySQL"
+  type        = string
+  default     = "mypassword"
+}
+
+variable "mysql_database" {
+  description = "MySQL Database Name"
+  type        = string
+  default     = "mydatabase"
 }
 
 }
