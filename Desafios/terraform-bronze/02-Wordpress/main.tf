@@ -8,10 +8,6 @@ terraform {
   }
 }
 
-provider "digitalocean" {
-  token = var.do_token
-}
-
 resource "digitalocean_droplet" "VM_aula" {
   image    = var.image_droplet
   name     = "VM"
@@ -20,47 +16,58 @@ resource "digitalocean_droplet" "VM_aula" {
   ssh_keys = [data.digitalocean_ssh_key.ssh_key.id]
 }
 
+resource "digitalocean_database_firewall" "example-fw" {
+  cluster_id = digitalocean_database_cluster.mysql-example.id
+
+  rule {
+    type  = "droplet"
+    value = digitalocean_droplet.VM_aula.id
+  }
+}
+
+resource "digitalocean_database_cluster" "mysql-example" {
+  name       = "mysql-cluster"
+  engine     = "mysql"
+  version    = "8"
+  size       = var.size_db
+  region     = var.region_droplet
+  node_count = 1
+
+}
+
 data "digitalocean_ssh_key" "ssh_key" {
-  name = "twitter-ssh"
-}  
+  name = "crm-ssh"
+}
 
 resource "digitalocean_firewall" "Firewall" {
   name = "Firewall"
 
-  droplet_ids = digitalocean_droplet.VM_aula[*].id
-
-                                                # INBOUND
+  # INBOUND
   inbound_rule {
     protocol         = "tcp"
     port_range       = "22"
-    source_addresses = ["239.13.117.114", "::/0"]
+    source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   inbound_rule {
     protocol         = "tcp"
     port_range       = "53"
-    source_addresses = ["239.13.117.114", "::/0"]
+    source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   inbound_rule {
     protocol         = "tcp"
     port_range       = "443"
-    source_addresses = ["239.13.117.114", "::/0"]
+    source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   inbound_rule {
     protocol         = "tcp"
     port_range       = "80"
-    source_addresses = ["239.13.117.114", "::/0"]
+    source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
-  inbound_rule {
-    protocol         = "tcp"
-    port_range       = "3306"
-    source_addresses = ["239.13.117.114"]
-  }
-
-                                                # OUTBOUND
+  # OUTBOUND
 
   outbound_rule {
     protocol              = "tcp"
@@ -80,46 +87,4 @@ resource "digitalocean_firewall" "Firewall" {
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 
-}
-
-variable "do_token" {
-}
-
-variable "image_droplet" {
-  default = "ubuntu-22-04-x64"
-}
-
-variable "size_droplet" {
-  default = "s-1vcpu-2gb"
-}
-
-variable "region_droplet" {
-  default = "nyc1"
-}
-
-variable "ssh_key_name" {
-  default = "twitter-ssh"
-}
-
-                              # Variáveis de ambiente do DB MySQL
-variable "mysql_user" {
-  description = "Username for MySQL"
-  type        = string
-  default     = "myuser"
-}
-
-variable "mysql_password" {
-  description = "Password for MySQL"
-  type        = string
-  default     = "mypassword"
-}
-
-variable "mysql_database" {
-  description = "MySQL Database Name"
-  type        = string
-  default     = "mydatabase"
-}
-
-output "mysql_connection_string" {
-  value = "mysql://${var.mysql_user}:${var.mysql_password}@${digitalocean_droplet.VM_aula.ipv4_address}/${var.mysql_database}"
 }
